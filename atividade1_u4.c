@@ -7,8 +7,11 @@
 #define PIN_LED_B 12
 #define PIN_LED_G 11
 #define PIN_BUZZER 21
-#define FREQ 350 // Frequência do buzzer em Hz
+#define FREQ_PADRAO 350 // Frequência do buzzer em Hz
 #define DEBOUNCE_DELAY 200 // Delay para debounce de teclas em milissegundos
+
+// Variável global para armazenar o slice do PWM
+int slice_buzzer;
 
 // Mapeamento do teclado matricial
 const uint8_t colunas[4] = {4, 3, 2, 1}; // Pinos das colunas
@@ -23,9 +26,11 @@ const char teclado[4][4] =
 
 // Protótipos das funções
 void configurar_leds();
-void configurar_buzzer();
+void configurar_buzzer(uint freq);
 void configurar_teclado();
 void turn_on_led(bool red, bool blue, bool green);
+void liga_buzzer();
+void desliga_buzzer();
 char leitura_teclado(); 
 
 int main() 
@@ -34,7 +39,7 @@ int main()
 
     // Configurações iniciais
     configurar_leds();
-    configurar_buzzer();
+    configurar_buzzer(FREQ_PADRAO);
     configurar_teclado();
 
     while (true) 
@@ -59,9 +64,9 @@ int main()
                 sleep_ms(1000);
                 break;
             case '#':
-                pwm_set_enabled(pwm_gpio_to_slice_num(PIN_BUZZER), true); // Ativa o buzzer
+                liga_buzzer(); // Ativa o buzzer
                 sleep_ms(1000);
-                pwm_set_enabled(pwm_gpio_to_slice_num(PIN_BUZZER), false); // Desativa o buzzer
+                desliga_buzzer(); // Desativa o buzzer
                 sleep_ms(1000);
                 break;
             default:
@@ -86,15 +91,16 @@ void configurar_leds() {
 }
 
 // Função para configurar o buzzer
-void configurar_buzzer() {
+void configurar_buzzer(uint freq) {
     gpio_set_function(PIN_BUZZER, GPIO_FUNC_PWM);
-    int slice_num = pwm_gpio_to_slice_num(PIN_BUZZER);
-    
-    uint32_t clk_sys = clock_get_hz(clk_sys); // Frequência do sistema (tipicamente 125 MHz)
-    uint16_t wrap = clk_sys / FREQ - 1; // Define o wrap para o PWM
+    slice_buzzer = pwm_gpio_to_slice_num(PIN_BUZZER);
 
-    pwm_set_wrap(slice_num, wrap); // Configura o valor de wrap
+    uint32_t clk_sys = clock_get_hz(clk_sys); // Frequência do sistema (125 MHz por padrão)
+    uint16_t wrap = clk_sys / freq - 1; // Calcula o valor de wrap
+
+    pwm_set_wrap(slice_buzzer, wrap); // Configura o valor de wrap
     pwm_set_gpio_level(PIN_BUZZER, wrap / 2); // Define o duty cycle (50%)
+    pwm_set_enabled(slice_buzzer, false); // Inicialmente desligado
 }
 
 // Função para configurar o teclado
@@ -117,6 +123,16 @@ void turn_on_led(bool red, bool blue, bool green) {
     gpio_put(PIN_LED_R, red);
     gpio_put(PIN_LED_B, blue);
     gpio_put(PIN_LED_G, green);
+}
+
+// Função para ligar o buzzer
+void liga_buzzer() {
+    pwm_set_enabled(slice_buzzer, true); // Ativa o PWM no slice do buzzer
+}
+
+// Função para desligar o buzzer
+void desliga_buzzer() {
+    pwm_set_enabled(slice_buzzer, false); // Desativa o PWM no slice do buzzer
 }
 
 // Função para ler o teclado
