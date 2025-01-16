@@ -42,39 +42,53 @@ int main()
     configurar_buzzer(FREQ_PADRAO);
     configurar_teclado();
 
+    char tecla_atual = 'n'; // Tecla atualmente detectada
+    char tecla_ultima = 'n'; // Última tecla processada
+
     while (true) 
     {    
-        char tecla = leitura_teclado();
+        tecla_atual = leitura_teclado(); // Verifica qual tecla foi pressionada
 
-        switch (tecla) {
-            case 'A':
-                turn_on_led(1, 0, 0); // LED vermelho
-                sleep_ms(500);
-                break;
-            case 'B':
-                turn_on_led(0, 1, 0); // LED verde
-                sleep_ms(1000);
-                break;
-            case 'C':
-                turn_on_led(0, 0, 1); // LED azul
-                sleep_ms(1000);
-                break;
-            case 'D':
-                turn_on_led(1, 1, 1); // Liga todos os LEDS
-                sleep_ms(1000);
-                break;
-            case '#':
-                liga_buzzer(); // Ativa o buzzer
-                sleep_ms(1000);
+        // Se uma tecla for pressionada
+        if (tecla_atual != 'n') {
+            if (tecla_atual != tecla_ultima) { // Se for uma tecla diferente da última processada
+                tecla_ultima = tecla_atual; // Atualiza a última tecla processada
+                switch (tecla_atual) {
+                    case 'A':
+                        turn_on_led(1, 0, 0); // Liga LED vermelho
+                        break;
+                    case 'B':
+                        turn_on_led(0, 1, 0); // Liga LED verde
+                        break;
+                    case 'C':
+                        turn_on_led(0, 0, 1); // Liga LED azul
+                        break;
+                    case 'D':
+                        turn_on_led(1, 1, 1); // Liga todos os LEDs
+                        break;
+                    case '#':
+                        liga_buzzer(); // Ativa o buzzer
+                        break;
+                    default:
+                        break;
+                }
+            }
+        } else {
+            // Se nenhuma tecla for pressionada, desliga os dispositivos
+            if (tecla_ultima != 'n') {
+                turn_on_led(0, 0, 0); // Desliga LEDs
                 desliga_buzzer(); // Desativa o buzzer
-                sleep_ms(1000);
-                break;
-            default:
-                turn_on_led(0, 0, 0); // Desliga os LEDs
-                break;
+                tecla_ultima = 'n'; // Reseta a última tecla processada
+            }
         }
 
-        sleep_ms(DEBOUNCE_DELAY); // Delay para evitar múltiplas leituras (debounce)
+        // Se uma tecla estiver pressionada, mantém a ação associada à tecla enquanto ela for pressionada
+        while (tecla_atual != 'n') {
+            tecla_atual = leitura_teclado(); // Atualiza a tecla pressionada
+            sleep_ms(50); // Delay para evitar leitura muito rápida
+        }
+
+        sleep_ms(50); // Delay para evitar leituras repetidas e otimizar o uso da CPU
     }
 
     return 0;
