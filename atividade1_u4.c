@@ -1,9 +1,17 @@
-#include "pico/stdlib.h"
 #include <stdio.h>
+#include "pico/stdlib.h"
+#include "hardware/pwm.h"
 
 // Definição dos pinos do teclado matricial
 const uint8_t colunas[4] = {4, 3, 2, 1}; // Pinos conectados às colunas do teclado
 const uint8_t linhas[4] = {5, 6, 7, 8};  // Pinos conectados às linhas do teclado
+
+//Função para ligar os LEDs
+void turn_on_led(bool red, bool blue, bool green){
+  gpio_put(GPIO_LED, red);
+  gpio_put(GPIO_LED_B, blue);
+  gpio_put(GPIO_LED_G, green);
+}
 
 // Mapeamento das teclas para os valores correspondentes
 const char teclado[4][4] = 
