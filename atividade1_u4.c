@@ -56,7 +56,7 @@ int main()
 // Função para ler o teclado matricial (retorna o caractere da tecla pressionada)
 char leitura_teclado()
 {
-    char numero = 'n'; // Inicializa como 'n' para indicar que nenhuma tecla foi pressionada
+    char tecla = 'n'; // Inicializa como 'n' para indicar que nenhuma tecla foi pressionada
 
     // Percorre todas as colunas
     for (int coluna = 0; coluna < 4; coluna++)
@@ -70,7 +70,7 @@ char leitura_teclado()
             // Se a linha estiver em 0, significa que a tecla foi pressionada
             if (gpio_get(linhas[linha]) == 0)
             {
-                numero = teclado[3 - linha][coluna]; // Mapeia o valor da tecla pressionada com a inversão da linha
+                tecla = teclado[3 - linha][coluna]; // Mapeia o valor da tecla pressionada com a inversão da linha
                 // Aguarda a tecla ser liberada (debounce)
                 while (gpio_get(linhas[linha]) == 0)
                 {
@@ -83,11 +83,11 @@ char leitura_teclado()
         // Desativa a coluna atual (coloca o pino da coluna como 1)
         gpio_put(colunas[coluna], 1);
 
-        if (numero != 'n') // Se uma tecla foi pressionada, sai do laço das colunas
+        if (tecla != 'n') // Se uma tecla foi pressionada, sai do laço das colunas
         {
             break;
         }
     }
 
-    return numero; // Retorna o valor da tecla pressionada
+    return tecla; // Retorna o valor da tecla pressionada
 }
