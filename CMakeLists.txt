@@ -67,10 +67,9 @@ target_include_directories(atividade1_u4 PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}
 )
 
-# Add any user requested libraries
+# Add biblioteca pwm
 target_link_libraries(atividade1_u4 
-        
-        )
+    hardware_pwm)
 
 pico_add_extra_outputs(atividade1_u4)
 
