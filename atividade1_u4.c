@@ -94,7 +94,6 @@ int main()
     return 0;
 }
 
-// Função para configurar os LEDs
 void configurar_leds() {
     gpio_init(PIN_LED_R);
     gpio_set_dir(PIN_LED_R, GPIO_OUT);
@@ -149,9 +148,10 @@ void desliga_buzzer() {
     pwm_set_enabled(slice_buzzer, false); // Desativa o PWM no slice do buzzer
 }
 
-// Função para ler o teclado
+// Função para ler o teclado e manter LEDs/buzzer ativos até outra tecla ser pressionada
 char leitura_teclado() {
-    char tecla = 'n'; // Inicializa com 'n' (nenhuma tecla pressionada)
+    static char ultima_tecla = 'n'; // Armazena a última tecla pressionada
+    char tecla = 'n';              // Inicializa com 'n' (nenhuma tecla pressionada)
 
     for (int coluna = 0; coluna < 4; coluna++) {
         gpio_put(colunas[coluna], 0); // Ativa a coluna (coloca como 0)
@@ -159,17 +159,45 @@ char leitura_teclado() {
         for (int linha = 0; linha < 4; linha++) {
             if (gpio_get(linhas[linha]) == 0) { // Se uma tecla foi pressionada
                 tecla = teclado[3 - linha][coluna]; // Mapeia a tecla pressionada
-                while (gpio_get(linhas[linha]) == 0) { // Espera a tecla ser liberada (debounce)
-                    sleep_ms(10); // Atraso para evitar múltiplas leituras
+                // Aguarda até que a tecla seja liberada para evitar leituras repetidas
+                while (gpio_get(linhas[linha]) == 0) {
+                    sleep_ms(10); // Delay para evitar leitura muito rápida
                 }
-                break;
+
+                break; // Sai do loop da linha
             }
         }
 
         gpio_put(colunas[coluna], 1); // Desativa a coluna (coloca como 1)
-
-        if (tecla != 'n') break; // Sai do laço se uma tecla foi pressionada
     }
 
-    return tecla; // Retorna a tecla pressionada
+    // Atualiza o estado apenas se uma nova tecla foi pressionada
+    if (tecla != 'n' && tecla != ultima_tecla) {
+        ultima_tecla = tecla; // Atualiza a última tecla pressionada
+
+        // Define a ação para a nova tecla pressionada
+        switch (tecla) {
+            case 'A':
+                turn_on_led(1, 0, 0); // Liga LED vermelho
+                break;
+            case 'B':
+                turn_on_led(0, 1, 0); // Liga LED verde
+                break;
+            case 'C':
+                turn_on_led(0, 0, 1); // Liga LED azul
+                break;
+            case 'D':
+                turn_on_led(1, 1, 1); // Liga todos os LEDs
+                break;
+            case '#':
+                pwm_set_enabled(pwm_gpio_to_slice_num(PIN_BUZZER), true); // Ativa o buzzer
+                break;
+            default:
+                turn_on_led(0, 0, 0); // Desliga LEDs como fallback
+                pwm_set_enabled(pwm_gpio_to_slice_num(PIN_BUZZER), false); // Desativa o buzzer
+                break;
+        }
+    }
+
+    return tecla; // Retorna a tecla pressionada ou 'n' se nenhuma tecla foi detectada
 }
