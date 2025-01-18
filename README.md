@@ -20,7 +20,7 @@ Cada integrante desempenhou um papel fundamental no desenvolvimento deste projet
 
 ## Link do Vídeo
 A apresentação da solução desenvolvida pode ser acessada no seguinte link:  
-[Vídeo de Apresentação](https://link-do-video.com)  
+[Vídeo de Apresentação](https://www.youtube.com/watch?v=fH6W3ZpC50Y)  
 
 ---
 
