@@ -1,12 +1,6 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/pwm.h"
-
-// Função para desligar todos os LEDs
-void turn_off_all_leds() {
-    gpio_put(LED_GREEN, 0);
-    gpio_put(LED_BLUE, 0);
-    gpio_put(LED_RED, 0);
   
 // Definições de pinos e constantes
 #define PIN_LED_R 13
@@ -206,5 +200,4 @@ char leitura_teclado() {
     }
 
     return tecla; // Retorna a tecla pressionada ou 'n' se nenhuma tecla foi detectada
- main
 }
